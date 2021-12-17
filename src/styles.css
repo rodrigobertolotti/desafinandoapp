@@ -1,0 +1,17 @@
+body {
+  background-color: #040303;
+}
+@font-face {
+  font-family: "Lato";
+  src: local("Lato"), url(./fonts/Lato-Regular.ttf) format("opentype");
+}
+
+@font-face {
+  font-family: "Monserrat";
+  src: local("Monserrat"),
+    url(./fonts/Monserrat/Montserrat-Medium.ttf) format("opentype");
+}
+p {
+  color: white;
+  font-family: "Monserrat";
+}
