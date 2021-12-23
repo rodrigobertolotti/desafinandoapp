@@ -47,21 +47,29 @@ export function SearchBar({
           onChange={(e) => onChangeSearchByName(e.target.value)}
         ></input>
       </div>
-      <div style={styles.section}>
-        <p style={styles.subtitle}>Favoritos:</p>
-        <input
-          type="checkbox"
-          style={styles.checkbox}
-          onChange={(e) => onChangeFavorites(e)}
-        ></input>
-      </div>
-      <div style={styles.section}>
-        <p style={styles.subtitle}>Gratis</p>
-        <input
-          type="checkbox"
-          style={styles.checkbox}
-          onChange={(e) => onChangeFree(e)}
-        ></input>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-end",
+        }}
+      >
+        <div style={styles.section}>
+          <p style={styles.subtitle}>Favoritos:</p>
+          <input
+            type="checkbox"
+            style={styles.checkbox}
+            onChange={(e) => onChangeFavorites(e)}
+          ></input>
+        </div>
+        <div style={styles.section}>
+          <p style={styles.subtitle}>Gratis</p>
+          <input
+            type="checkbox"
+            style={styles.checkbox}
+            onChange={(e) => onChangeFree(e)}
+          ></input>
+        </div>
       </div>
     </div>
   );

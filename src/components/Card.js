@@ -1,7 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import star from "../assets/star.png";
 import selected_star from "../assets/selected_star.png";
 import share from "../assets/share.png";
+import money from "../assets/money.png";
+import lupa from "../assets/lupa.png";
+import "../styles.css";
+
+require("dotenv").config();
 
 function Card({
   id,
@@ -11,8 +16,11 @@ function Card({
   isFavorite,
   isModalOpen,
 }) {
-  const imageUrl =
-    "http://localhost:1337" + show?.picture?.data?.attributes?.url;
+  const API_URL = process.env.REACT_APP_API_URL;
+  const SERVER = process.env.REACT_APP_SERVER;
+
+  const imageUrl = SERVER + show?.picture?.data?.attributes?.url;
+  const todayDate = new Date();
   const date = show.date.split("T");
   const processedDate = date[0].split("-");
   const day = processedDate[2];
@@ -21,32 +29,44 @@ function Card({
   const processedTime = date[1].split(":");
   const hours = processedTime[0];
   const minutes = processedTime[1];
-  const showDate = new Date(year, month - 1, day);
-  const todayDate = new Date();
-  const hideShow = todayDate > showDate;
+  //today date esta andando como el cu
+  const dayToShow =
+    todayDate.getDay() === day &&
+    todayDate.getMonth() === month &&
+    todayDate.getFullYear() === year
+      ? "HOY"
+      : todayDate.getDay() + 1 === day &&
+        todayDate.getMonth() === month &&
+        todayDate.getFullYear() === year
+      ? "MAÑANA"
+      : day + "/" + month;
   const styles = {
     card: {
-      display: hideShow ? "none" : "flex",
-      flexDirection: hideShow ? "row" : "column",
+      display: "flex",
+      flexDirection: "column",
       position: "relative",
-      width: "100%",
+      width: "300px",
       height: "500px",
-      maxWidth: "400px",
+      maxWidth: "370px",
       borderRadius: 10,
       backgroundColor: "rgba(255,255,255,0.2)",
     },
     imageContainer: {
       position: "relative",
+      width: "100%",
+      height: "220px",
+      alignItems: "center",
       overflow: "hidden",
       justifyContent: "center",
-      alignSelf: "center",
-      minWidth: "300px",
+      display: "flex",
     },
     image: {
-      width: "400px",
-      height: "240px",
-      borderTopLeftRadius: 10,
-      borderTopRightRadius: 10,
+      position: "absolute",
+      width: "100%",
+    },
+    imageShortHeight: {
+      position: "absolute",
+      height: "100%",
     },
     infoContainer: {
       padding: "20px",
@@ -57,6 +77,7 @@ function Card({
       fontWeight: "500",
       padding: 0,
       margin: 0,
+      paddingTop: 5,
     },
     title: {
       fontWeight: "700",
@@ -88,17 +109,27 @@ function Card({
     },
     star: {
       position: "absolute",
-      top: 10,
+      bottom: 5,
       right: 10,
       width: "30px",
       cursor: "pointer",
     },
+    lupa: {
+      position: "absolute",
+      bottom: 7,
+      right: 85,
+      width: "25px",
+      cursor: "pointer",
+    },
     share: {
       position: "absolute",
-      top: 9,
+      bottom: 2,
       right: 45,
       width: "35px",
       cursor: "pointer",
+    },
+    grow: {
+      scale: 1.1,
     },
     actionsContainer: {
       bottom: 0,
@@ -117,7 +148,6 @@ function Card({
       borderRadius: 10,
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: "rgba(255,255,255,0.2)",
       padding: 10,
     },
     sectionText: {
@@ -125,67 +155,88 @@ function Card({
       padding: 0,
       margin: 0,
     },
+    moneyContainer: {
+      display: "flex",
+    },
+    money: {
+      width: "30px",
+      height: "auto",
+      marginRight: 8,
+    },
   };
-  const [isImageHovered, setIsImageHovered] = useState(false);
   const shareData = {
     title: "MDN",
     text: "Learn web development on MDN!",
     url: "https://developer.mozilla.org",
   };
+  const [imageWidth, setImageWidth] = useState();
+  const [imageHeight, setImageHeight] = useState();
+  useEffect(() => {
+    var img = new Image();
+    img.onload = function () {
+      setImageHeight(this.height);
+      setImageWidth(this.width);
+    };
+    img.src = imageUrl;
+  }, [imageUrl]);
+  console.log(imageHeight);
+  console.log(imageWidth);
   return (
     <div style={styles.card}>
-      <div
-        style={styles.imageContainer}
-        onMouseEnter={() => setIsImageHovered(true)}
-        onMouseLeave={() => setIsImageHovered(false)}
-        onClick={onOpenImage}
-      >
-        {isImageHovered && (
-          <div style={styles.hoverEffect}>
-            <div style={styles.showFlyerText}>
-              <p>VER IMAGEN</p>
-            </div>
-          </div>
-        )}
-        <object style={styles.image} data={imageUrl}>
+      <div style={styles.imageContainer}>
+        <object
+          style={
+            imageHeight > imageWidth - 100
+              ? styles.image
+              : styles.imageShortHeight
+          }
+          data={imageUrl}
+        >
           <img
-            style={styles.image}
+            style={
+              imageHeight > imageWidth ? styles.image : styles.imageShortHeight
+            }
             src={
               "https://images.squarespace-cdn.com/content/v1/5477b6e0e4b07ec2525f51b0/1496087068286-NA1O8BY0WYV18RS8VQ9D/RECITAL-CUERDAS-OSNE2.jpg?format=1500w"
             }
             alt=""
           />
         </object>
-      </div>
-      <div style={styles.infoContainer}>
         <img
           src={isFavorite ? selected_star : star}
           style={styles.star}
+          className="scaleOnHover"
           onClick={() => onAddFavorite(id)}
           alt=""
         ></img>
         <img
           src={share}
           style={styles.share}
+          className="scaleOnHover"
           onClick={() => navigator.share(shareData)}
           alt=""
         ></img>
-        <p style={styles.title}>{show.name + " " + id}</p>
-
-        <p style={styles.subtitle}>{day + "/" + month}</p>
-        <p style={styles.description}>{show.description}</p>
+        <img
+          src={lupa}
+          style={styles.lupa}
+          className="scaleOnHover"
+          onClick={onOpenImage}
+          alt=""
+        ></img>
       </div>
-      <div style={styles.row}>
-        <div style={styles.sectionItem}>
-          <p style={styles.sectionText}>{hours + ":" + minutes + "hs"}</p>
+      <div style={styles.infoContainer}>
+        <div style={{ paddingRight: 15 }}>
+          <p style={styles.title}>{show.name}</p>
         </div>
-        <div style={styles.sectionItem}>
-          <p style={styles.sectionText}>
+        <p style={styles.subtitle}>
+          {dayToShow} - {hours + ":" + minutes + "hs"}
+        </p>
+        <p style={styles.description}>{show.description}</p>
+        <div style={styles.moneyContainer}>
+          <img src={money} style={styles.money} alt=""></img>
+          <p style={styles.subtitle}>
             {show.free ? "GRATIS" : show.price + "$"}
           </p>
-        </div>
-        <div style={styles.sectionItem}>
-          <p style={styles.sectionText}>{show.price}</p>
         </div>
       </div>
     </div>

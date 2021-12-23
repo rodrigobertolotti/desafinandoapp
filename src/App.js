@@ -6,8 +6,11 @@ import { getShows } from "./services/showService";
 import { Header } from "./components/Header";
 import Modal from "react-modal";
 import { MIN_WINDOW_WIDTH } from "./constants";
+require("dotenv").config();
 
 const window_size = window.innerWidth;
+const API_URL = process.env.REACT_APP_API_URL;
+const SERVER_URL = process.env.REACT_APP_SERVER;
 
 function App() {
   const styles = {
@@ -20,6 +23,7 @@ function App() {
     },
     carousel: {
       display: "flex",
+      flex: 1,
       flexDirection: "row",
       width: "100%",
       position: "absolute",
@@ -76,8 +80,9 @@ function App() {
             "No pudimos cargar los recitales :(. Intenta de nuevo mas tarde"
           );
         } else {
-          setShows(res.data);
-          setCompleteShows(res.data);
+          const shows = showsFilteringDate(res.data);
+          setShows(shows);
+          setCompleteShows(shows);
         }
       });
     } catch (e) {
@@ -129,7 +134,7 @@ function App() {
     if (text.length > 2) {
       setShows(
         completeShows.filter((show) =>
-          show.attributes.name.toUpperCase().includes(text.toUpperCase())
+          show.name.toUpperCase().includes(text.toUpperCase())
         )
       );
     } else {
@@ -140,9 +145,7 @@ function App() {
   const handleChangeShowFree = (e) => {
     const checked = e.target.checked;
     if (checked && shows) {
-      setShows(
-        completeShows.filter((show) => show.attributes.free === checked)
-      );
+      setShows(completeShows.filter((show) => show.free === checked));
     } else {
       setShows(completeShows);
     }
@@ -155,7 +158,6 @@ function App() {
       shows.forEach((show) => {
         const showInFav = favorites[show.id];
         if (showInFav) {
-          console.log(show.id + " se encuentra en favoritos ");
           newShows.push(show);
         }
       });
@@ -173,15 +175,15 @@ function App() {
   const handleAddFavorite = (id) => {
     let favorites = localStorage.getItem("favoritas");
     let jsonFavorites;
-    let parsedFav = JSON.parse(favorites);
-    const existsInFav = parsedFav[id];
-    if (existsInFav) {
-      delete parsedFav[id];
-      jsonFavorites = parsedFav;
+    if (!favorites) {
+      jsonFavorites = {};
+      jsonFavorites[id] = id;
     } else {
-      if (!favorites) {
-        jsonFavorites = {};
-        jsonFavorites[id] = id;
+      let parsedFav = JSON.parse(favorites);
+      const existsInFav = parsedFav[id];
+      if (existsInFav) {
+        delete parsedFav[id];
+        jsonFavorites = parsedFav;
       } else {
         jsonFavorites = parsedFav;
         jsonFavorites[id] = id;
@@ -193,12 +195,12 @@ function App() {
 
   const orderedShows = (shows) => {
     function sortByDate(show1, show2) {
-      const date1 = show1.attributes.date.split("T");
+      const date1 = show1.date.split("T");
       const processedDate1 = date1[0].split("-");
       const day1 = processedDate1[2];
       const month1 = processedDate1[1];
       const year1 = processedDate1[0];
-      const date2 = show2.attributes.date.split("T");
+      const date2 = show2.date.split("T");
       const processedDate2 = date2[0].split("-");
       const day2 = processedDate2[2];
       const month2 = processedDate2[1];
@@ -209,6 +211,27 @@ function App() {
       );
     }
     return shows.sort(sortByDate);
+  };
+
+  const showsFilteringDate = (shows) => {
+    let filteredShows = [];
+    const todayDate = new Date();
+    shows.forEach((s) => {
+      let show = s.attributes;
+      const id = s.id;
+      show.id = id;
+      const date = show.date.split("T");
+      const processedDate = date[0].split("-");
+      const day = processedDate[2];
+      const month = processedDate[1];
+      const year = processedDate[0];
+      const showDate = new Date(year, month - 1, day);
+      const hideShow = todayDate > showDate;
+      if (!hideShow) {
+        filteredShows.push(show);
+      }
+    });
+    return filteredShows;
   };
 
   return (
@@ -226,7 +249,7 @@ function App() {
         onChangeSearchByName={(text) => handleChangeSearchByName(text)}
         onChangeFree={handleChangeShowFree}
         onChangeFavorites={handleChangeShowFavorites}
-      ></SearchBar>
+      ></SearchBar>{" "}
       {isCopyPressed && (
         <div style={styles.copyiedHintContainer}>
           <CopyiedHint
@@ -243,25 +266,23 @@ function App() {
       ) : (
         <div style={styles.carousel} id="draggable">
           {shows &&
-            orderedShows(shows).map((s) => {
-              const show = s.attributes;
+            orderedShows(shows).map((show) => {
               return (
-                <div key={s.id} style={styles.cardContainer}>
+                <div key={show.id} style={styles.cardContainer}>
                   <Card
-                    id={s.id}
+                    id={show.id}
                     image={
                       "https://images.squarespace-cdn.com/content/v1/5477b6e0e4b07ec2525f51b0/1496087068286-NA1O8BY0WYV18RS8VQ9D/RECITAL-CUERDAS-OSNE2.jpg?format=1500w"
                     }
                     onCopyText={handleCopyText}
                     onOpenImage={() =>
                       handleClickShowImage(
-                        "http://localhost:1337" +
-                          show?.picture?.data?.attributes?.url
+                        SERVER_URL + show?.picture?.data?.attributes?.url
                       )
                     }
                     show={show}
                     onAddFavorite={handleAddFavorite}
-                    isFavorite={favorites && favorites[s.id]}
+                    isFavorite={favorites && favorites[show.id]}
                     isModalOpen={showModal}
                   ></Card>
                 </div>
