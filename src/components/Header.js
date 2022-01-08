@@ -2,6 +2,8 @@ import React from "react";
 import whatsapp from "../assets/whatsapp.png";
 
 export function Header() {
+  const width = window.innerWidth;
+  console.log(width);
   const styles = {
     header: {
       display: "flex",
@@ -13,17 +15,17 @@ export function Header() {
       borderBottom: "4px solid #A04C59",
     },
     title: {
-      fontSize: 30,
+      fontSize: width < 520 ? 24 : 30,
       padding: 0,
       margin: 0,
     },
     titleSmall: {
-      fontSize: 22,
+      fontSize: width < 520 ? 18 : 22,
       padding: 0,
       margin: 0,
     },
     smallText: {
-      fontSize: 14,
+      fontSize: width < 520 ? 11 : 14,
       margin: 0,
       padding: 0,
     },
@@ -35,13 +37,11 @@ export function Header() {
     },
     whatsappButton: {
       display: "flex",
-      flexDirection: "row",
-      alignItems: "center",
-      cursor: "pointer",
+      alignItems: "flex-end",
+      flexDirection: width < 520 ? "row" : "column",
     },
     whatsappContainer: {
       display: "flex",
-      flexDirection: "flex-end",
     },
   };
 
@@ -58,15 +58,19 @@ export function Header() {
         <p style={styles.title}>MUSICA EN VIVO</p>
       </div>
       <div style={styles.whatsappContainer}>
-        <div
-          style={styles.whatsappButton}
-          onClick={() => sendWhatsappMessage()}
-        >
-          <p style={styles.smallText}>
-            Sabes de algún recital que no esté en la lista?
-          </p>{" "}
-          <img src={whatsapp} style={styles.whatsappLogo}></img>
-          <p style={styles.smallText}>Escribinos por Whatsapp!</p>
+        <div style={styles.whatsappButton}>
+          <img
+            src={whatsapp}
+            style={styles.whatsappLogo}
+            onClick={() => sendWhatsappMessage()}
+          ></img>
+          <p
+            className="clickeable"
+            style={styles.smallText}
+            onClick={() => sendWhatsappMessage()}
+          >
+            Falta algun toque? Escribinos por Whatsapp!
+          </p>
         </div>
       </div>
     </div>

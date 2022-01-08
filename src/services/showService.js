@@ -4,7 +4,7 @@ export async function getShows() {
   const API_URL = process.env.REACT_APP_API_URL;
 
   try {
-    var response = await fetch(API_URL + "shows?populate=*");
+    var response = await fetch(API_URL + "shows");
     return response.json();
   } catch (e) {
     return false;

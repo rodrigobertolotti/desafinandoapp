@@ -16,7 +16,6 @@ function Card({
   isFavorite,
   isModalOpen,
 }) {
-  const API_URL = process.env.REACT_APP_API_URL;
   const SERVER = process.env.REACT_APP_SERVER;
 
   const imageUrl = SERVER + show?.picture?.data?.attributes?.url;
@@ -160,7 +159,7 @@ function Card({
     },
     money: {
       width: "30px",
-      height: "auto",
+      height: "30px",
       marginRight: 8,
     },
   };
